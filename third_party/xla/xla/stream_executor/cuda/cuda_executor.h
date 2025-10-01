@@ -137,7 +137,29 @@ class CudaExecutor : public GpuExecutor {
   absl::StatusOr<std::unique_ptr<MemoryAllocator>> CreateMemoryAllocator(
       MemoryType type) override;
 
+  // RAII wrapper for a VMM memory handle.
+  struct VmmMemoryHandle {
+    uint64_t handle;
+
+    explicit VmmMemoryHandle(uint64_t handle) : handle(handle) {}
+    ~VmmMemoryHandle();
+    VmmMemoryHandle(const VmmMemoryHandle&) = delete;
+    VmmMemoryHandle& operator=(const VmmMemoryHandle&) = delete;
+    VmmMemoryHandle(VmmMemoryHandle&&);
+    VmmMemoryHandle& operator=(VmmMemoryHandle&&);
+
+   private:
+    absl::Status Release();
+  };
+
+  // Returns a handle to the given memory if it was allocated with VMM API.
+  absl::StatusOr<VmmMemoryHandle> RetainVmmMemoryHandle(void* ptr);
+
  private:
+  absl::Status VmmDeallocateMemory(void* ptr);
+
+  absl::StatusOr<void*> VmmAllocateMemory(uint64_t bytes);
+
   // Loads a module in cubin format.
   absl::StatusOr<ModuleHandle> LoadModuleFromCuBin(const char* cubin)
       ABSL_EXCLUSIVE_LOCKS_REQUIRED(in_memory_modules_mu_);
@@ -151,6 +173,10 @@ class CudaExecutor : public GpuExecutor {
 
   // Returns true if a delay kernel is supported.
   absl::StatusOr<bool> DelayKernelIsSupported();
+
+  bool is_vmm_supported_ = false;
+
+  bool is_rdma_supported_ = false;
 
   // Guards the in-memory-module mapping.
   absl::Mutex in_memory_modules_mu_;
