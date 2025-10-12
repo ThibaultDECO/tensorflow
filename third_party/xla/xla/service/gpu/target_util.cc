@@ -247,6 +247,9 @@ struct TargetDeviceFunction GetDeviceFunctionRoot(
     case TargetDeviceFunctionID::kAsin: {
       return {"__nv_asin", "__ocml_asin", "_Z16__spirv_ocl_asin"};
     }
+    case TargetDeviceFunctionID::kAsinh: {
+      return {"__nv_asinh", "__ocml_asinh", "_Z16__spirv_ocl_asinh"};
+    }
     case TargetDeviceFunctionID::kAtanh: {
       return {"__nv_atanh", "__ocml_atanh", "_Z15__spirv_ocl_atanh"};
     }
@@ -313,6 +316,8 @@ std::optional<TargetDeviceFunctionID> GetTargetDeviceFunctionID(HloOpcode op) {
       return TargetDeviceFunctionID::kAcosh;
     case HloOpcode::kAsin:
       return TargetDeviceFunctionID::kAsin;
+    case HloOpcode::kAsinh:
+      return TargetDeviceFunctionID::kAsinh;
     case HloOpcode::kAtan2:
       return TargetDeviceFunctionID::kAtan2;
     case HloOpcode::kAtanh:
